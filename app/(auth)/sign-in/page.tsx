@@ -1,0 +1,10 @@
+import { SigninCard } from '@/features/auth/components/sign-in-card'
+import React from 'react'
+
+export default function SigninPage() {
+  return (
+    <div>
+        <SigninCard />
+    </div>
+  )
+}
