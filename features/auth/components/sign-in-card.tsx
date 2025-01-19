@@ -18,17 +18,15 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
+import { loginSchema } from "../schemas";
+import { useLogin } from "../api/use-login";
 
-const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1, "Required"),
-});
-
-type FormSchemaTypes = z.infer<typeof formSchema>;
+type FormSchemaTypes = z.infer<typeof loginSchema>;
 
 export const SigninCard = () => {
+  const { mutate } = useLogin();
   const form = useForm<FormSchemaTypes>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -36,7 +34,7 @@ export const SigninCard = () => {
   });
 
   const onSubmit = (values: FormSchemaTypes) => {
-    console.log(values);
+    mutate({ json: values });
   };
   return (
     <Card className="w-full h-full md:w-[487px] border-none shadow-none">
