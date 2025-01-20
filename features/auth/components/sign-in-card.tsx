@@ -24,7 +24,7 @@ import { useLogin } from "../api/use-login";
 type FormSchemaTypes = z.infer<typeof loginSchema>;
 
 export const SigninCard = () => {
-  const { mutate } = useLogin();
+  const { mutate, isPending } = useLogin();
   const form = useForm<FormSchemaTypes>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -80,7 +80,7 @@ export const SigninCard = () => {
                 </FormItem>
               )}
             />
-            <Button size={"lg"} className="w-full" disabled={false}>
+            <Button size={"lg"} className="w-full" disabled={isPending}>
               Login
             </Button>
           </form>
@@ -93,7 +93,7 @@ export const SigninCard = () => {
 
       <CardContent className="p-7 flex flex-col gap-y-4">
         <Button
-          disabled={false}
+          disabled={isPending}
           variant={"secondary"}
           size={"lg"}
           className="w-full"
@@ -102,7 +102,7 @@ export const SigninCard = () => {
           Login with google
         </Button>
         <Button
-          disabled={false}
+          disabled={isPending}
           variant={"secondary"}
           size={"lg"}
           className="w-full"
