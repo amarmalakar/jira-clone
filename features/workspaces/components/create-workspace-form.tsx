@@ -21,15 +21,16 @@ import { useRef } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Image from "next/image";
 import { ImageIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface CreateWorkspaceFormProps {
   onCancel: () => void;
 }
 
-// export default function CreateWorkspaceForm({
-//   onCancel,
-// }: CreateWorkspaceFormProps) {
-export default function CreateWorkspaceForm() {
+export default function CreateWorkspaceForm({
+  onCancel,
+}: CreateWorkspaceFormProps) {
+  const router = useRouter();
   const { mutate, isPending } = useCreateWorkspace();
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -45,17 +46,21 @@ export default function CreateWorkspaceForm() {
     // console.log("🚀 ~ onSubmit ~ values:", values);
     const finalValue = {
       ...values,
-      image: values.image instanceof File ? values.image : ""
-    }
-    mutate({ form: finalValue }, {
-      onSuccess: () => {
-        form.reset();
-        if (inputRef.current) {
-          inputRef.current.value = "";
-        }
-        // TODO: redirect to new workspace
+      image: values.image instanceof File ? values.image : "",
+    };
+    mutate(
+      { form: finalValue },
+      {
+        onSuccess: ({ data }) => {
+          form.reset();
+          if (inputRef.current) {
+            inputRef.current.value = "";
+          }
+          onCancel?.();
+          router.push(`/workspaces/${data.$id}`);
+        },
       }
-    });
+    );
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -161,7 +166,7 @@ export default function CreateWorkspaceForm() {
                 type="button"
                 size={"lg"}
                 variant={"secondary"}
-                // onClick={onCancel}
+                onClick={onCancel}
                 disabled={isPending}
               >
                 Cancel
