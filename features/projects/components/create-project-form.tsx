@@ -19,7 +19,7 @@ import { useRef } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Image from "next/image";
 import { ImageIcon } from "lucide-react";
-// import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useCreateProject } from "../api/use-create-project";
 import { createProjectSchema } from "../schemas";
@@ -33,7 +33,7 @@ export default function CreateProjectForm({
   onCancel,
 }: CreateProjectFormProps) {
   const workspaceId = useWorkspaceId()
-  // const router = useRouter();
+  const router = useRouter();
   const { mutate, isPending } = useCreateProject();
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -55,13 +55,13 @@ export default function CreateProjectForm({
     mutate(
       { form: finalValue },
       {
-        onSuccess: () => {
+        onSuccess: ({data}) => {
           form.reset();
           if (inputRef.current) {
             inputRef.current.value = "";
           }
           onCancel?.();
-          // router.push(`/project/${data.$id}`);
+          router.push(`/workspaces/${workspaceId}/projects/${data.$id}`);
         },
       }
     );
