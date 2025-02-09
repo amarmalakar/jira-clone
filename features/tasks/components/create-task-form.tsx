@@ -117,11 +117,11 @@ export default function CreateTaskForm({
               />
 
               <FormField
-                name="asigneeId"
+                name="assigneeId"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Asignee</FormLabel>
+                    <FormLabel>assignee</FormLabel>
                     <FormControl>
                       <Select
                         defaultValue={field.value}

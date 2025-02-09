@@ -6,7 +6,7 @@ import { getMember } from "@/features/members/utils";
 import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, TASKS_ID } from "@/config";
 import { ID, Query } from "node-appwrite";
 import { z } from "zod";
-import { TaskStatus } from "../types";
+import { Task, TaskStatus } from "../types";
 import { createAdminClient } from "@/lib/appwrite";
 
 const app = new Hono()
@@ -16,7 +16,7 @@ const app = new Hono()
     zValidator("query", z.object({
       workspaceId: z.string(),
       projectId: z.string().nullish(),
-      asigneeId: z.string().nullish(),
+      assigneeId: z.string().nullish(),
       status: z.nativeEnum(TaskStatus).nullish(),
       search: z.string().nullish(),
       dueDate: z.string().nullish()
@@ -29,7 +29,7 @@ const app = new Hono()
       const {
         workspaceId,
         projectId,
-        asigneeId,
+        assigneeId,
         status,
         search,
         dueDate
@@ -49,21 +49,21 @@ const app = new Hono()
         Query.equal("workspaceId", workspaceId),
         Query.orderDesc("$createdAt"),
         ...(projectId ? [Query.equal("projectId", projectId)] : []),
-        ...(asigneeId ? [Query.equal("asigneeId", asigneeId)] : []),
+        ...(assigneeId ? [Query.equal("assigneeId", assigneeId)] : []),
         ...(status ? [Query.equal("status", status)] : []),
         ...(search ? [Query.search("name", search)] : []),
         ...(dueDate ? [Query.equal("dueDate", dueDate)] : []),
         Query.orderAsc("position")
       ]
 
-      const tasks = await databases.listDocuments(
+      const tasks = await databases.listDocuments<Task>(
         DATABASE_ID,
         TASKS_ID,
         query
       )
 
       const projectIds = tasks.documents.map(task => task.projectId)
-      const asigneeIds = tasks.documents.map(task => task.asigneeId)
+      const assigneeIds = tasks.documents.map(task => task.assigneeId)
 
       const projects = await databases.listDocuments(
         DATABASE_ID,
@@ -74,10 +74,10 @@ const app = new Hono()
       const members = await databases.listDocuments(
         DATABASE_ID,
         MEMBERS_ID,
-        asigneeIds.length > 0 ? [Query.equal("$id", asigneeIds)] : []
+        assigneeIds.length > 0 ? [Query.equal("$id", assigneeIds)] : []
       )
 
-      const asignees = await Promise.all(
+      const assignees = await Promise.all(
         members.documents.map(async (member) => {
           const user = await users.get(member.userId)
           return {
@@ -90,12 +90,12 @@ const app = new Hono()
 
       const populatedTasks = tasks.documents.map(task => {
         const project = projects.documents.find(project => project.$id === task.projectId)
-        const asignee = asignees.find(asignee => asignee.$id === task.asigneeId)
+        const assignee = assignees.find(assignee => assignee.$id === task.assigneeId)
 
         return {
           ...task,
           project,
-          asignee
+          assignee
         }
       })
 
@@ -115,7 +115,7 @@ const app = new Hono()
         workspaceId,
         projectId,
         dueDate,
-        asigneeId
+        assigneeId
       } = c.req.valid("json");
 
       const member = await getMember({
@@ -151,7 +151,7 @@ const app = new Hono()
           workspaceId,
           projectId,
           dueDate,
-          asigneeId,
+          assigneeId,
           position: newPosition
         }
       )
